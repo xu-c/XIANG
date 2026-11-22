@@ -17,7 +17,7 @@ from cursor import focus
 from game import BLACK, RED, Game, coords, legal_moves, side, square
 from lan_session import LanSession
 from engine import LEVELS, pick_move
-from rtc_peer import RtcPeer
+from rtc_peer import ROOM_CODE_LENGTH, RtcPeer
 
 LANGUAGES = ("zh", "en")
 COLORS = (RED, BLACK)
@@ -290,10 +290,10 @@ class App:
         if self.page == "lan_input":
             if key == "backspace":
                 self.room_code = self.room_code[:-1]
-            elif len(key) == 1 and key in "0123456789" and len(self.room_code) < 10:
+            elif len(key) == 1 and key in "0123456789" and len(self.room_code) < ROOM_CODE_LENGTH:
                 self.room_code += key
             elif key == "enter":
-                if len(self.room_code) != 10:
+                if len(self.room_code) != ROOM_CODE_LENGTH:
                     self.notice = "lan_code_hint"
                     return
                 self.lan = LanSession(RtcPeer(), self.room_code)

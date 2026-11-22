@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const words = {
   "chess-title": ["中国象棋", "Chinese Chess"], deselect: ["取消选棋", "Deselect"],
   "lan-title": ["局域网联机", "LAN play"],
-  guide: ["双方连接到同一局域网，使用 10 位房间码配对。", "Connect to the same LAN and pair with a 10-digit room code."],
+  guide: ["双方连接到同一局域网，使用 6 位房间码配对。", "Connect to the same LAN and pair with a 6-digit room code."],
   "host-red-label": ["房主执红", "Host plays red"], "undo-label": ["允许悔棋", "Allow undo"],
   "sound-label": ["音效", "Sound"], host: ["创建房间", "Create room"], "code-label": ["房间码", "Room code"],
   join: ["加入房间", "Join room"], undo: ["悔棋", "Undo"], rematch: ["重新开始", "Play again"],

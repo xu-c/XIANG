@@ -1,4 +1,4 @@
-const defaultEndpoint = "https://wmoaxlrncbfcsyqtfbku.supabase.co/functions/v1/five-pair";
+const defaultEndpoint = "https://wmoaxlrncbfcsyqtfbku.supabase.co/functions/v1/xiang-pair";
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");

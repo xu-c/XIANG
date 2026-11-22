@@ -4,10 +4,10 @@ Cardputer Zero 中国象棋。Debian 包名为 `xiang`，应用名为 **XIANG**�
 
 ## 安装
 
-将 `dist/xiang_1.0.1-2_arm64.deb` 复制到 Zero，在设备上运行：
+将 `dist/xiang_1.0.2-1_arm64.deb` 复制到 Zero，在设备上运行：
 
 ```sh
-sudo apt install ./xiang_1.0.1-2_arm64.deb
+sudo apt install ./xiang_1.0.2-1_arm64.deb
 ```
 
 安装后从 APPLaunch 打开 **XIANG**。商店发布信息见 store.json。AppStore 按 5 查询分享码，须先在 CardputerZero Hub 发布并完成审核。
@@ -33,9 +33,9 @@ AI 使用开源的 [象棋小巫师 XQWLight](xqwlight/UPSTREAM.md)。沿用上�
 
 ## 局域网联机
 
-两台 Zero 接入同一局域网。房主选「创建房间」，指定执红方和是否允许悔棋，再分享 10 位房间码。对手选「加入房间」并输入房间码。房间码有效期为五分钟，配对时需要联网，棋步通过 WebRTC 直连传输。
+两台 Zero 接入同一局域网。房主选「创建房间」，指定执红方和是否允许悔棋，再分享 6 位房间码。对手选「加入房间」并输入房间码。房间码有效期为五分钟，配对时需要联网，棋步通过 WebRTC 直连传输。
 
-在 [xiangzero.vercel.app](https://xiangzero.vercel.app/) 可在浏览器创建或加入房间、离开对局、悔棋和再来一局，可与 Zero 或浏览器互通。由 `vercel.json` 构建 `web/`，同源的 `api/pair.js` 转发配对请求。默认复用 Five 的信令服务，并使用独立的 `xiang` 数据频道。自建信令时，应在网页部署和 Zero 端配置同一个 `XIANG_SIGNAL_URL`。浏览器版以联机对战为用途。
+在 [xiangzero.vercel.app](https://xiangzero.vercel.app/) 可在浏览器创建或加入房间、离开对局、悔棋和再来一局，可与 Zero 或浏览器互通。由 `vercel.json` 构建 `web/`，同源的 `api/pair.js` 转发配对请求。默认使用 XIANG 的六位码信令服务，并使用独立的 `xiang` 数据频道。自建信令时，应在网页部署和 Zero 端配置同一个 `XIANG_SIGNAL_URL`。浏览器版以联机对战为用途。信令源码和数据库初始化脚本见 [pairing](pairing/)。
 
 ## 本地开发
 

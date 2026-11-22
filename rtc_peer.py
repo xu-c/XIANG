@@ -11,8 +11,9 @@ from uuid import uuid4
 
 from lan import Room, RoomError
 
+ROOM_CODE_LENGTH = 6
 SIGNAL_URL = os.environ.get("XIANG_SIGNAL_URL",
-    "https://wmoaxlrncbfcsyqtfbku.supabase.co/functions/v1/five-pair")
+    "https://wmoaxlrncbfcsyqtfbku.supabase.co/functions/v1/xiang-pair")
 
 
 def signal(action, timeout=8, **data):
@@ -146,6 +147,8 @@ class RtcPeer:
                 pass
 
     async def join(self, code):
+        if len(code) != ROOM_CODE_LENGTH or any(char not in "0123456789" for char in code):
+            raise RoomError("wrong_code")
         description = self.open_connection()
         self.pc.on("datachannel", self.attach)
 

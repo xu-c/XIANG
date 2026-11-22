@@ -20,7 +20,7 @@
     </div>
     <section aria-label="Match">
       <h2 id="lan-title">局域网联机</h2>
-      <p id="guide">双方连接到同一局域网，使用 10 位房间码配对。</p>
+      <p id="guide">双方连接到同一局域网，使用 6 位房间码配对。</p>
       <div id="setup">
         <label><input type="checkbox" id="host-red" checked><span id="host-red-label">房主执红</span></label>
         <label><input type="checkbox" id="allow-undo"><span id="undo-label">允许悔棋</span></label>
@@ -28,7 +28,7 @@
         <button id="host" type="button">创建房间</button>
         <form id="join-form">
           <label for="code" id="code-label">房间码</label>
-          <input id="code" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{10}" required>
+          <input id="code" type="text" inputmode="numeric" autocomplete="off" maxlength="6" pattern="[0-9]{6}" required>
           <button id="join" type="submit">加入房间</button>
         </form>
       </div>
