@@ -21,7 +21,7 @@ DARK_PIECES = ("", "將", "士", "象", "馬", "車", "炮", "卒")
 LABELS = {
     "menu_title": ("中国象棋", "Chinese Chess"),
     "unselect": ("取消选棋", "Deselect"),
-    "select": ("选棋", "Select piece"),
+    "select": ("选棋", "Select"),
     "lan": ("局域网联机", "LAN play"),
     "lan_host": ("创建房间", "Host room"),
     "lan_first": ("执红方", "Red side"),

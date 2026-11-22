@@ -43,7 +43,7 @@ def main():
     launcher = "usr/share/APPLaunch"
     icon_path = f"{launcher}/share/images/xiang.png"
     control = """Package: xiang
-Version: 1.0.1-1
+Version: 1.0.1-2
 Section: games
 Priority: optional
 Architecture: arm64
@@ -81,7 +81,7 @@ Categories=Game;BoardGame;
         f"{docs}/store.json": ((root / "store.json").read_bytes(), 0o644),
         f"{docs}/LICENSE": ((root / "LICENSE").read_bytes(), 0o644),
     })
-    output = root / "dist" / "xiang_1.0.1-1_arm64.deb"
+    output = root / "dist" / "xiang_1.0.1-2_arm64.deb"
     output.parent.mkdir(exist_ok=True)
     (root / "web" / "xiang-icon.png").write_bytes(icon_bytes)
     (output.parent / "xiang-icon.png").write_bytes(icon_bytes)

@@ -4,10 +4,10 @@ Cardputer Zero 中国象棋。Debian 包名为 `xiang`，应用名为 **XIANG**�
 
 ## 安装
 
-将 `dist/xiang_1.0.1-1_arm64.deb` 复制到 Zero，在设备上运行：
+将 `dist/xiang_1.0.1-2_arm64.deb` 复制到 Zero，在设备上运行：
 
 ```sh
-sudo apt install ./xiang_1.0.1-1_arm64.deb
+sudo apt install ./xiang_1.0.1-2_arm64.deb
 ```
 
 安装后从 APPLaunch 打开 **XIANG**。商店发布信息见 store.json。AppStore 按 5 查询分享码，须先在 CardputerZero Hub 发布并完成审核。
