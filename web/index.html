@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XIANG</title>
+  <link rel="icon" href="xiang-icon.png">
+  <link rel="stylesheet" href="xiang.css">
+  <script defer src="game.js"></script>
+  <script defer src="peer.js"></script>
+  <script defer src="xiang.js"></script>
+</head>
+<body>
+<main>
+  <header><h1>XIANG</h1><button id="language" type="button">English</button></header>
+  <div class="layout">
+    <div id="board" role="group" aria-label="XIANG">
+      <canvas id="grid" width="450" height="500" aria-hidden="true"></canvas>
+      <div id="squares"></div>
+    </div>
+    <section aria-label="Match">
+      <h2 id="lan-title">局域网联机</h2>
+      <p id="guide">双方连接到同一局域网，使用 10 位房间码配对。</p>
+      <div id="setup">
+        <label><input type="checkbox" id="host-red" checked><span id="host-red-label">房主执红</span></label>
+        <label><input type="checkbox" id="allow-undo"><span id="undo-label">允许悔棋</span></label>
+        <label><input type="checkbox" id="sound" checked><span id="sound-label">音效</span></label>
+        <button id="host" type="button">创建房间</button>
+        <form id="join-form">
+          <label for="code" id="code-label">房间码</label>
+          <input id="code" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{10}" required>
+          <button id="join" type="submit">加入房间</button>
+        </form>
+      </div>
+      <p id="status" role="status"></p>
+      <output id="room-code" hidden></output>
+      <div class="actions" id="actions" hidden>
+        <button id="undo" type="button">悔棋</button>
+        <button id="rematch" type="button">重新开始</button>
+        <button id="leave" type="button">离开房间</button>
+      </div>
+    </section>
+  </div>
+</main>
+</body>
+</html>
+

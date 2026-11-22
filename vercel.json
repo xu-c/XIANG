@@ -1,0 +1,15 @@
+{
+  "buildCommand": "mkdir -p public && cp web/* stone.wav public/",
+  "outputDirectory": "public",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {"key": "Referrer-Policy", "value": "no-referrer"},
+        {"key": "X-Content-Type-Options", "value": "nosniff"},
+        {"key": "Content-Security-Policy", "value": "default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"}
+      ]
+    }
+  ]
+}
+
