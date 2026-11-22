@@ -1,5 +1,5 @@
 create table public.xiang_pairs (
-    code text primary key check (code ~ '^([0-9]{6}|[0-9]{6})$'),
+    code text primary key check (code ~ '^[0-9]{6}$'),
     host_key uuid not null,
     guest_key uuid,
     offer text not null check (length(offer) between 1 and 8192),

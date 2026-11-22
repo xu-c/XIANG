@@ -8,10 +8,10 @@ function validDescription(value: unknown): value is string {
     value.includes("m=application ");
 }
 
-function newCode(length: number) {
+function newCode() {
   const [high, low] = crypto.getRandomValues(new Uint32Array(2));
-  return ((BigInt(high) * 4294967296n + BigInt(low)) % (10n ** BigInt(length)))
-    .toString().padStart(length, "0");
+  return ((BigInt(high) * 4294967296n + BigInt(low)) % 1000000n)
+    .toString().padStart(6, "0");
 }
 
 async function database(path: string, method = "GET", body?: object | string, rows = false) {
@@ -74,11 +74,9 @@ Deno.serve(async (request) => {
     }
     if (action === "offer") {
       if (!validDescription(sdp)) return send({error: "invalid_request"}, 400);
-      // Older Zero clients still require ten digits.
-      const length = input.code_length === 6 ? 6 : 10;
       const secret = crypto.randomUUID();
       for (let attempt = 0; attempt < 3; attempt++) {
-        const generated = newCode(length);
+        const generated = newCode();
         if (await database("rpc/xiang_create_pair", "POST",
           {p_code: generated, p_host_key: secret, p_offer: sdp})) {
           return send({code: generated, key: secret});
@@ -86,7 +84,7 @@ Deno.serve(async (request) => {
       }
       return send({error: "try_later"}, 429);
     }
-    if (typeof code !== "string" || !/^(?:[0-9]{6}|[0-9]{6})$/.test(code)) {
+    if (typeof code !== "string" || !/^[0-9]{6}$/.test(code)) {
       return send({error: "wrong_code"}, 404);
     }
     const params = new URLSearchParams({code: `eq.${code}`, expires_at: `gt.${new Date().toISOString()}`});
