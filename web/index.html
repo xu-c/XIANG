@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>XIANG</title>
+  <title>中国象棋</title>
   <link rel="icon" href="xiang-icon.png">
   <link rel="stylesheet" href="xiang.css">
   <script defer src="game.js"></script>
@@ -12,9 +12,9 @@
 </head>
 <body>
 <main>
-  <header><h1>XIANG</h1><button id="language" type="button">English</button></header>
+  <header><h1 id="chess-title">中国象棋</h1><button id="language" type="button">English</button></header>
   <div class="layout">
-    <div id="board" role="group" aria-label="XIANG">
+    <div id="board" role="group" aria-labelledby="chess-title">
       <canvas id="grid" width="450" height="500" aria-hidden="true"></canvas>
       <div id="squares"></div>
     </div>
@@ -35,6 +35,7 @@
       <p id="status" role="status"></p>
       <output id="room-code" hidden></output>
       <div class="actions" id="actions" hidden>
+        <button id="deselect" type="button" hidden>取消选棋</button>
         <button id="undo" type="button">悔棋</button>
         <button id="rematch" type="button">重新开始</button>
         <button id="leave" type="button">离开房间</button>

@@ -2,6 +2,7 @@
 
 const $ = id => document.getElementById(id);
 const words = {
+  "chess-title": ["中国象棋", "Chinese Chess"], deselect: ["取消选棋", "Deselect"],
   "lan-title": ["局域网联机", "LAN play"],
   guide: ["双方连接到同一局域网，使用 10 位房间码配对。", "Connect to the same LAN and pair with a 10-digit room code."],
   "host-red-label": ["房主执红", "Host plays red"], "undo-label": ["允许悔棋", "Allow undo"],
@@ -39,8 +40,17 @@ const buttons = game.board.map((_, index) => {
     const delta = {ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0]}[event.key];
     if (!delta) return;
     event.preventDefault();
-    const [x, y] = xy(index);
-    buttons[sq((x + delta[0] + W) % W, (y + delta[1] + H) % H)].focus();
+    const [x, y] = xy(index), [dx, dy] = delta;
+    const ranked = buttons.flatMap((cell, position) => {
+      if (position === index || cell.disabled) return [];
+      const [px, py] = xy(position);
+      const forward = (px - x) * dx + (py - y) * dy;
+      const across = Math.abs((px - x) * dy - (py - y) * dx);
+      const distance = forward < 0 ? forward + (dx ? W : H) : forward;
+      return [{cell, group: forward > 0 ? 0 : forward < 0 ? 1 : 2, score: across * 2 + distance}];
+    });
+    ranked.sort((a, b) => a.group - b.group || a.score - b.score);
+    ranked[0]?.cell.focus();
   });
   $("squares").append(button);
   return button;
@@ -71,6 +81,7 @@ function drawGrid() {
 
 function translate() {
   document.documentElement.lang = language ? "en" : "zh-CN";
+  document.title = tr("chess-title");
   $("language").textContent = language ? "简体中文" : "English";
   for (const [id, values] of Object.entries(words)) {
     if ($(id)) $(id).textContent = values[language];
@@ -92,7 +103,9 @@ function render() {
     button.classList.toggle("capture", targets.includes(index) && Boolean(piece));
     button.classList.toggle("check", checkedGeneral === index);
     button.setAttribute("aria-label", `${String.fromCharCode(65 + x)}${y + 1} ${piece ? sideText(colorOf(piece)) + " " + letter : ""}`);
-    button.disabled = !playable;
+    const actionable = selected === null ? piece && colorOf(piece) === color
+      && !game.destinations(index).next().done : targets.includes(index);
+    button.disabled = !playable || !actionable;
     if (button.textContent !== letter || (button.firstChild?.classList.contains("red") || false) !== (piece > 0)) {
       button.textContent = "";
       if (piece) {
@@ -105,6 +118,7 @@ function render() {
   });
   $("setup").hidden = Boolean(peer);
   $("actions").hidden = !peer;
+  $("deselect").hidden = selected === null;
   $("undo").hidden = !state?.undo || game.ended;
   $("undo").disabled = !playable || game.moves.length < 2;
   $("rematch").hidden = !game.ended;
@@ -201,8 +215,8 @@ function choose(cell) {
   if (!canMove()) return;
   const index = color === BLACK ? W * H - 1 - cell : cell;
   notice = "";
-  if (selected === index) selected = null;
-  else if (colorOf(game.board[index]) === color) selected = index;
+  if (selected === null && colorOf(game.board[index]) === color
+      && !game.destinations(index).next().done) selected = index;
   else if (selected !== null) {
     if ([...game.destinations(selected)].includes(index)) {
       request("move", {source: selected, dest: index, ply: game.moves.length});
@@ -211,7 +225,24 @@ function choose(cell) {
     notice = "illegal_move";
   }
   render();
+  if (selected !== null) buttons.find(button => !button.disabled)?.focus();
 }
+
+function deselect() {
+  if (selected === null) return;
+  const cell = color === BLACK ? W * H - 1 - selected : selected;
+  selected = null;
+  render();
+  if (!buttons[cell].disabled) buttons[cell].focus();
+}
+
+$("deselect").addEventListener("click", deselect);
+window.addEventListener("keydown", event => {
+  if (selected !== null && ["Escape", "Backspace"].includes(event.key)) {
+    event.preventDefault();
+    deselect();
+  }
+});
 
 $("language").addEventListener("click", () => {
   language = 1 - language;

@@ -13,12 +13,12 @@ import subprocess
 from tempfile import NamedTemporaryFile
 from time import monotonic
 
-from game import BLACK, RED, WIDTH, HEIGHT, Game, coords, side, square
+from cursor import focus
+from game import BLACK, RED, Game, coords, legal_moves, side, square
 from lan_session import LanSession
-from engine import pick_move
+from engine import LEVELS, pick_move
 from rtc_peer import RtcPeer
 
-LEVELS = ("easy", "normal", "hard")
 LANGUAGES = ("zh", "en")
 COLORS = (RED, BLACK)
 START_CURSOR = (4, 6)
@@ -101,6 +101,7 @@ class App:
             self.game, self.mode, self.level = game, mode, level
             self.player_color = player_color
             self.cursor = coords(game.history[-1][1]) if game.history else START_CURSOR
+            self.adjust_cursor(game)
         except (KeyError, ValueError, TypeError, AttributeError):
             self.notice = "load_error"
 
@@ -169,6 +170,7 @@ class App:
     def begin_game(self):
         self.cursor = (4, 3) if self.flipped else START_CURSOR
         self.source = None
+        self.adjust_cursor(self.game)
         self.open("game")
         self.save()
 
@@ -223,10 +225,8 @@ class App:
                 self.begin_game()
             elif key == "u":
                 self.undo()
-            elif direction:
-                self.cursor = self.move_cursor(self.cursor, direction, self.flipped)
-            elif key == "enter" and not self.computer_turn:
-                self.select_move(self.game)
+            elif not self.game.ended and not self.computer_turn:
+                self.handle_board(self.game, key, direction)
             return
         rows = self.menu()
         if direction and direction[1]:
@@ -303,50 +303,71 @@ class App:
         if session.closed and key == "enter":
             self.leave_lan()
             self.open("lan")
-        elif direction and session.game is not None:
-            self.lan_cursor = self.move_cursor(self.lan_cursor, direction, session.color == BLACK)
-        elif key == "enter" and session.game:
-            if session.game.ended:
-                session.rematch()
-            elif session.can_play:
-                self.select_move(session.game, session)
+        elif key == "enter" and session.game and session.game.ended:
+            session.rematch()
         elif key == "u":
-            self.lan_source = None
+            self.clear_selection(session)
             session.undo()
+        elif session.can_play:
+            self.handle_board(session.game, key, direction, session)
 
     @property
     def flipped(self):
         return self.mode == "cpu" and self.player_color == BLACK
 
-    @staticmethod
-    def move_cursor(cursor, direction, flipped):
-        x, y = cursor
-        dx, dy = direction
-        multiplier = -1 if flipped else 1
-        return (x + multiplier * dx) % WIDTH, (y + multiplier * dy) % HEIGHT
+    def adjust_cursor(self, game, session=None, direction=None):
+        if game.ended:
+            return
+        if session:
+            source, cursor, flipped = self.lan_source, self.lan_cursor, session.color == BLACK
+        else:
+            source, cursor, flipped = self.source, self.cursor, self.flipped
+        options = (game.destinations(source) if source is not None else
+                   dict.fromkeys(start for start, _ in legal_moves(game.board, game.turn)))
+        point = focus(cursor, options, direction, flipped)
+        if session:
+            self.lan_cursor = point
+        else:
+            self.cursor = point
+
+    def clear_selection(self, session=None):
+        source = self.lan_source if session else self.source
+        if source is None:
+            return False
+        if session:
+            self.lan_source, self.lan_cursor = None, coords(source)
+        else:
+            self.source, self.cursor = None, coords(source)
+        return True
+
+    def handle_board(self, game, key, direction, session=None):
+        if direction:
+            self.adjust_cursor(game, session, direction)
+        elif key == "backspace":
+            self.clear_selection(session)
+        elif key == "enter":
+            self.select_move(game, session)
 
     def select_move(self, game, session=None):
         source = self.lan_source if session else self.source
         target = square(*(self.lan_cursor if session else self.cursor))
-        if target == source:
-            source = None
-        elif side(game.board[target]) == game.turn:
-            source = target
-        elif source is None:
-            self.notice = "select_piece"
-        elif target not in game.destinations(source):
-            self.notice = "illegal_move"
-        else:
+        if source is None:
+            if not game.destinations(target):
+                return
             if session:
+                self.lan_source = target
+            else:
+                self.source = target
+            self.adjust_cursor(game, session)
+        elif session:
+            if target in game.destinations(source):
+                self.lan_source = None
                 session.move((source, target))
-            elif game.play((source, target)):
-                self.play_sound()
-                self.save()
-            source = None
-        if session:
-            self.lan_source = source
-        else:
-            self.source = source
+        elif game.play((source, target)):
+            self.source = None
+            self.adjust_cursor(game)
+            self.play_sound()
+            self.save()
 
     def leave_lan(self):
         if self.lan is not None:
@@ -367,6 +388,9 @@ class App:
         self.cancel_escape()
         if self.running and self.page != "home":
             self.play_sound(menu=True)
+            if ((self.page == "game" and self.clear_selection())
+                    or (self.page == "lan_game" and self.clear_selection(self.lan))):
+                return
             if self.page in ("lan_game", "lan_input", "lan_setup", "lan_help"):
                 if self.lan is not None and self.lan.closed:
                     self.leave_lan()
@@ -399,6 +423,7 @@ class App:
         self.cursor = coords(self.game.history[-count][0])
         self.source = None
         self.game.undo(count)
+        self.adjust_cursor(self.game)
         self.reset_engine_retry()
         self.save()
 
@@ -419,6 +444,8 @@ class App:
                     self.lan_cursor = coords(before.history[len(current.history)][0])
                 if current is not None and (before is None or before.history != current.history or new_round):
                     self.lan_source = None
+                if current is not None and self.lan.can_play:
+                    self.adjust_cursor(current, self.lan)
                 if (self.page == "lan_game" and not new_round and before and current
                         and len(before.history) < len(current.history)):
                     self.play_sound()
@@ -433,6 +460,7 @@ class App:
                 except Exception:
                     move = None
                 if move is not None and game.play(move):
+                    self.adjust_cursor(game)
                     self.reset_engine_retry()
                     self.dirty = True
                     self.play_sound()
@@ -480,10 +508,10 @@ class App:
 def preview(app, screen):
     import tkinter as tk
     from PIL import Image, ImageTk
-    from ui import TITLE
+    from ui import label as translate
 
     window = tk.Tk()
-    window.title(TITLE)
+    window.title(translate("menu_title", app.settings.language))
     label = tk.Label(window, borderwidth=0, highlightthickness=0)
     label.pack()
     window.resizable(False, False)
@@ -533,6 +561,7 @@ def preview(app, screen):
             window.destroy()
             return
         if app.dirty:
+            window.title(translate("menu_title", app.settings.language))
             image = screen.render(app).resize((640, 340), Image.Resampling.NEAREST)
             label.image = ImageTk.PhotoImage(image)
             label.configure(image=label.image)

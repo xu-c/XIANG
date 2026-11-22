@@ -43,12 +43,12 @@ def main():
     launcher = "usr/share/APPLaunch"
     icon_path = f"{launcher}/share/images/xiang.png"
     control = """Package: xiang
-Version: 1.0.0-1
+Version: 1.0.1-1
 Section: games
 Priority: optional
 Architecture: arm64
 Maintainer: xu-c <3174585+xu-c@users.noreply.github.com>
-Depends: python3 (>= 3.9), python3-pil (>= 9.2), python3-evdev, python3-aiortc, ca-certificates, fonts-noto-cjk, alsa-utils
+Depends: python3 (>= 3.9), python3-pil (>= 9.2), python3-evdev, python3-aiortc, ca-certificates, fonts-noto-cjk, alsa-utils, nodejs (>= 18)
 Description: Chinese chess with LAN multiplayer for Cardputer Zero
  Play against the computer, share one device, or play over your local network.
  .
@@ -69,8 +69,10 @@ Categories=Game;BoardGame;
     icon_bytes = image.getvalue()
     payload = {f"{share}/{name}": ((root / name).read_bytes(), 0o644)
                for name in ("xiang.py", "game.py", "ui.py", "device.py", "stone.wav", "menu.wav", "engine.py",
-                            "lan.py", "lan_session.py", "rtc_peer.py")}
+                            "lan.py", "lan_session.py", "rtc_peer.py", "cursor.py")}
     docs = "usr/share/doc/xiang"
+    for name in ("book.js", "position.js", "search.js", "run.cjs", "LICENSE", "UPSTREAM.md"):
+        payload[f"{share}/xqwlight/{name}"] = ((root / "xqwlight" / name).read_bytes(), 0o644)
     payload.update({
         "usr/bin/xiang": (entry.encode(), 0o755),
         f"{launcher}/applications/xiang.desktop": (desktop.encode("utf-8"), 0o644),
@@ -79,7 +81,7 @@ Categories=Game;BoardGame;
         f"{docs}/store.json": ((root / "store.json").read_bytes(), 0o644),
         f"{docs}/LICENSE": ((root / "LICENSE").read_bytes(), 0o644),
     })
-    output = root / "dist" / "xiang_1.0.0-1_arm64.deb"
+    output = root / "dist" / "xiang_1.0.1-1_arm64.deb"
     output.parent.mkdir(exist_ok=True)
     (root / "web" / "xiang-icon.png").write_bytes(icon_bytes)
     (output.parent / "xiang-icon.png").write_bytes(icon_bytes)

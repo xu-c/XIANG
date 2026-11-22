@@ -19,6 +19,9 @@ PIECES = ("", "帥", "仕", "相", "馬", "車", "炮", "兵")
 DARK_PIECES = ("", "將", "士", "象", "馬", "車", "炮", "卒")
 
 LABELS = {
+    "menu_title": ("中国象棋", "Chinese Chess"),
+    "unselect": ("取消选棋", "Deselect"),
+    "select": ("选棋", "Select piece"),
     "lan": ("局域网联机", "LAN play"),
     "lan_host": ("创建房间", "Host room"),
     "lan_first": ("执红方", "Red side"),
@@ -51,7 +54,7 @@ LABELS = {
     "cpu": ("离线人机", "Play computer"), "local": ("同机双人", "Two players"),
     "resume": ("继续对局", "Resume game"), "settings": ("设置", "Settings"),
     "difficulty": ("人机难度", "Difficulty"),
-    "easy": ("简单", "Easy"), "normal": ("普通", "Normal"), "hard": ("困难", "Hard"),
+    "easy": ("入门", "Beginner"), "normal": ("业余", "Amateur"), "hard": ("专业", "Professional"),
     "language": ("语言", "Language"), "zh": ("简体中文", "简体中文"), "en": ("English", "English"),
     "on": ("开", "On"), "off": ("关", "Off"),
     "sound": ("音效", "Sound effects"),
@@ -92,10 +95,11 @@ def piece_text(piece):
     return (PIECES if piece > 0 else DARK_PIECES)[abs(piece)]
 
 
-def piece_disc(draw, x, y, radius, letter, color, font):
+def piece_disc(draw, x, y, radius, letter, color, font, selected=False):
     draw.ellipse((x - radius, y - radius + 1, x + radius, y + radius + 1), fill="#81552e")
     draw.ellipse((x - radius, y - radius, x + radius, y + radius),
-                 fill="#ffe6b6", outline="#a97947")
+                 fill="#caf5b6" if selected else "#ffe6b6",
+                 outline="#21644b" if selected else "#a97947")
     inset = max(1, radius // 11)
     r = radius - inset
     if radius >= 8:
@@ -140,7 +144,7 @@ def board(draw, rect, pieces, font, *, cursor=None, source=None, destinations=()
         if piece:
             x, y = pixel(index)
             piece_disc(draw, x, y, (step - 2) // 2, piece_text(piece),
-                       RED_INK if piece > 0 else BLACK_INK, font(max(8, step - 4)))
+                       RED_INK if piece > 0 else BLACK_INK, font(max(8, step - 4)), index == source)
     for index in destinations:
         x, y = pixel(index)
         if pieces[index]:
@@ -227,11 +231,13 @@ class Screen:
             source = app.lan_source if session else app.source
             flipped = session.color == BLACK if session else app.flipped
             board(draw, (1, 1, 168, 168), game.board, self.font,
-                  cursor=None if game.ended else square(*cursor), source=source, last=last,
+                  cursor=(square(*cursor) if not game.ended and
+                          (session.can_play if session else not app.computer_turn) else None),
+                  source=source, last=last,
                   destinations=game.destinations(source) if source is not None and app.settings.show_targets else (),
                   king_in_check=game.board.index(sign(game.turn) * KING) if game.in_check else None,
                   flipped=flipped)
-            text(177, 10, TITLE, 21)
+            text(177, 10, tr("menu_title"), 18)
             subtitle = (tr("lan") + "  ·  " + tr("play_black" if session.color == BLACK else "play_red")
                         if session else tr(app.mode) + "  ·  " +
                         (tr(app.level) if app.mode == "cpu" else "9 × 10"))
@@ -294,26 +300,27 @@ class Screen:
                 text(177, 111, "↑↓←→  /  F X Z C", 11, MUTED)
             if not game.ended:
                 undo_hint = "     U  " + tr("undo") if not session or session.allow_undo else ""
-                text(177, 129, "Enter  " + tr("place") + undo_hint, 11)
+                action = tr("place" if source is not None else "select")
+                text(177, 129, "Enter  " + action + (undo_hint if source is None else ""), 11)
             if countdown is not None:
                 draw.rectangle((5, 139, 315, 164), fill=PANEL)
                 text(160, 151, exit_message, 12, ACCENT, "mm")
             else:
-                text(177, 147, "Esc  " + tr("menu"), 11)
+                text(177, 147, "Esc  " + tr("unselect" if source is not None else "menu"), 11)
             return image
 
         if app.page == "lan_help":
             text(14, 7, tr("lan_help"), 18)
             lines = (("双方接入同一局域网，配对时需要联网。",
-                      "房主创建房间并分享 10 位房间码。",
+                      "Zero 和网页均可建房，分享 10 位房间码。",
                       "对手选择「加入房间」，输入房间码。",
                       "房主可指定执红方，并设置是否允许悔棋。",
-                      "请保持房主的应用开启。",
+                      "网页：xiangzero.vercel.app",
                       "若房间允许悔棋，轮到自己时按 U 退两手。") if lang == "zh" else
-                     ("Use the same LAN. Pairing requires internet access.", "Host a room and share its 10-digit code.",
+                     ("Use the same LAN. Pairing requires internet access.", "Host on Zero or the web and share the 10-digit code.",
                       "Choose Join room and enter your opponent's code.",
                       "The host assigns red and can allow undo.",
-                      "Keep the host application open.", "When enabled, press U on your turn to undo two moves."))
+                      "Web: xiangzero.vercel.app", "If enabled, press U on your turn to undo two moves."))
             for index, line in enumerate(lines):
                 text(14, 33 + index * 18, line, 10 if lang == "en" else 12)
             text(14, 151, exit_message if countdown is not None else tr("lan_back"), 11, MUTED)
@@ -340,7 +347,7 @@ class Screen:
             return image
 
         if app.page == "home":
-            text(14, 10, TITLE, 23)
+            text(14, 10, tr("menu_title"), 23)
             board(draw, (194, 8, 305, 142), INITIAL, self.font)
             left, right, top, height = 14, 173, 38, 20
         elif app.page == "settings":
