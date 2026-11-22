@@ -3,6 +3,13 @@
   "name": "XIANG",
   "share_code": "ZGXQ",
   "version": "1.0.1-2",
-  "description": "中国象棋，支持离线三档人机、同机双人和局域网联机。"
+  "license": "GPL-3.0-or-later",
+  "source": "https://github.com/xu-c/XIANG",
+  "summary": "中国象棋，支持开源 AI 三档人机、同机双人和局域网联机 · Chinese chess with open-source AI, local and LAN play",
+  "description": "简体中文\n在 Cardputer Zero 下中国象棋。支持离线人机、同机双人和局域网联机，提供简体中文和英文界面。方向键只在当前可走的己方棋子间跳转，选中后高亮棋子并跳转至合法落点。短按 Esc 或 Backspace 取消选棋。\n\n离线人机使用 Morning Yellow（象棋百科全书 / xqbase）的开源「象棋小巫师」XQWLight 引擎，沿用入门、业余、专业三档。随包提供未修改的引擎源文件和许可证。XIANG 采用 GPL-3.0-or-later，内含 XQWLight JavaScript 文件采用 GPL-2.0-or-later。\n\n局域网联机使用 10 位房间码，配对需要联网，走棋通过 WebRTC 直连。联机网页：https://xiangzero.vercel.app/\n\nEnglish\nPlay Chinese chess on Cardputer Zero against an offline engine, with a friend on one device, or over your LAN. Choose Simplified Chinese or English. Arrow keys jump between movable pieces or legal destinations. Press Esc or Backspace to deselect.\n\nOffline computer play uses the open-source XiangQi Wizard Light (XQWLight) engine by Morning Yellow (xqbase), with its original Beginner, Amateur, and Professional levels. The package includes the unmodified engine source and license. XIANG is GPL-3.0-or-later. The bundled XQWLight JavaScript files are GPL-2.0-or-later.\n\nLAN mode uses a 10-digit room code. Pairing requires internet access, and moves travel directly over WebRTC. Web app: https://xiangzero.vercel.app/\n\nSource / 源码 · https://github.com/xu-c/XIANG\nEngine / 引擎 · https://github.com/xqbase/xqwlight",
+  "engine": {
+    "name": "XQWLight",
+    "license": "GPL-2.0-or-later",
+    "upstream": "https://github.com/xqbase/xqwlight/tree/6221733f1f79b3acb44cce6f83dc6100443cb2c9"
+  }
 }
-

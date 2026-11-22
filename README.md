@@ -48,3 +48,14 @@ python build_package.py
 
 设备接口、音效、部分界面和 WebRTC 传输改编自 Five。项目采用 GPL-3.0-or-later，见 [LICENSE](LICENSE)。
 
+
+
+## 开源许可与引擎署名 / License and engine credits
+
+XIANG 的应用代码和引擎接入层采用 **GPL-3.0-or-later**。内附的象棋小巫师（XQWLight）JavaScript 引擎由 Morning Yellow（象棋百科全书 / xqbase）开发。随包的 \`position.js\`、\`search.js\` 和 \`book.js\` 的文件头授权采用 **GPL-2.0-or-later**，允许按 GPLv3 条款与本项目一同分发。仓库和安装包均附引擎原始源码、原版权声明和许可证。构建脚本随仓库源码发布。
+
+XIANG's application code and engine adapter are **GPL-3.0-or-later**. The bundled XiangQi Wizard Light JavaScript engine by Morning Yellow (xqbase) is **GPL-2.0-or-later**, as stated in the notices in all three bundled scripts, including the opening book. The repository and Debian package preserve those unmodified sources, copyright notices and upstream license. The repository includes the package build script.
+
+- [XIANG 许可证 / License](LICENSE)
+- [引擎来源及版本 / Engine provenance](xqwlight/UPSTREAM.md)
+- [引擎许可证 / Engine license](xqwlight/LICENSE)
