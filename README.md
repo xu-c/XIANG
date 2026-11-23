@@ -4,10 +4,10 @@ Cardputer Zero 中国象棋。Debian 包名为 `xiang`，应用名为 **XIANG**�
 
 ## 安装
 
-将 `dist/xiang_1.0.2-1_arm64.deb` 复制到 Zero，在设备上运行：
+将 `dist/xiang_1.0.3-1_arm64.deb` 复制到 Zero，在设备上运行：
 
 ```sh
-sudo apt install ./xiang_1.0.2-1_arm64.deb
+sudo apt install ./xiang_1.0.3-1_arm64.deb
 ```
 
 安装后从 APPLaunch 打开 **XIANG**。商店发布信息见 store.json。AppStore 按 5 查询分享码，须先在 CardputerZero Hub 发布并完成审核。
@@ -30,6 +30,12 @@ sudo apt install ./xiang_1.0.2-1_arm64.deb
 棋局包含将军、应将、双将照面限制、将死与困毙。重复局面三次时，单方连续将军的一方判负，其他情况判和。长捉等比赛棋例采用上述重复局面判定。
 
 AI 使用开源的 [象棋小巫师 XQWLight](xqwlight/UPSTREAM.md)。沿用上游三档搜索预算 10、100、1000 毫秒，通过 Node.js 子进程离线运行。原始引擎源码及许可证随包提供。
+
+## 切换语言 / Switch language
+
+在 Zero 主菜单进入「设置」，选中「语言」，按 Enter 或左右方向键（Z / C）切换「简体中文」和「English」。网页端点击右上角的 English 或简体中文按钮。
+
+On Zero, open Settings from the main menu, highlight Language, and press Enter or Left/Right (Z / C) to switch between English and Simplified Chinese. On the web, use the English / 简体中文 button in the upper-right corner.
 
 ## 局域网联机
 

@@ -15,6 +15,7 @@ BG, PANEL, TEXT = "#141c20", "#243136", "#faf4e9"
 MUTED, ACCENT = "#b6c4c2", "#a7e7ca"
 WOOD, GRID = "#d8af75", "#78542f"
 RED_INK, BLACK_INK = "#9b241e", "#24211e"
+CAPTURE_FILL, CAPTURE_EDGE = "#ffb54c", "#8d3514"
 PIECES = ("", "帥", "仕", "相", "馬", "車", "炮", "兵")
 DARK_PIECES = ("", "將", "士", "象", "馬", "車", "炮", "卒")
 
@@ -95,11 +96,16 @@ def piece_text(piece):
     return (PIECES if piece > 0 else DARK_PIECES)[abs(piece)]
 
 
-def piece_disc(draw, x, y, radius, letter, color, font, selected=False):
+def piece_disc(draw, x, y, radius, letter, color, font, *, selected=False, capture=False):
+    if capture:
+        fill, edge = CAPTURE_FILL, CAPTURE_EDGE
+    elif selected:
+        fill, edge = "#caf5b6", "#21644b"
+    else:
+        fill, edge = "#ffe6b6", "#a97947"
     draw.ellipse((x - radius, y - radius + 1, x + radius, y + radius + 1), fill="#81552e")
     draw.ellipse((x - radius, y - radius, x + radius, y + radius),
-                 fill="#caf5b6" if selected else "#ffe6b6",
-                 outline="#21644b" if selected else "#a97947")
+                 fill=fill, outline=edge)
     inset = max(1, radius // 11)
     r = radius - inset
     if radius >= 8:
@@ -109,7 +115,7 @@ def piece_disc(draw, x, y, radius, letter, color, font, selected=False):
 
 
 def board(draw, rect, pieces, font, *, cursor=None, source=None, destinations=(),
-          last=None, king_in_check=None, flipped=False):
+          capture=None, last=None, king_in_check=None, flipped=False):
     left, top, right, bottom = rect
     draw.rounded_rectangle(rect, radius=6, fill=WOOD)
     step = min((right - left - 16) // (WIDTH - 1), (bottom - top - 16) // (HEIGHT - 1))
@@ -144,16 +150,20 @@ def board(draw, rect, pieces, font, *, cursor=None, source=None, destinations=()
         if piece:
             x, y = pixel(index)
             piece_disc(draw, x, y, (step - 2) // 2, piece_text(piece),
-                       RED_INK if piece > 0 else BLACK_INK, font(max(8, step - 4)), index == source)
+                       RED_INK if piece > 0 else BLACK_INK, font(max(8, step - 4)),
+                       selected=index == source, capture=index == capture)
     for index in destinations:
         x, y = pixel(index)
         if pieces[index]:
+            if index == capture:
+                continue
             r = step // 2
             draw.ellipse((x - r, y - r, x + r, y + r), outline="#256c52")
         else:
             draw.ellipse((x - 2, y - 2, x + 2, y + 2), fill="#256c52")
     for index, tint in ((last[0] if last else None, "#778449"), (last[1] if last else None, "#778449"),
-                        (king_in_check, "#b02423"), (source, "#247e5b"), (cursor, "#143f36")):
+                        (king_in_check, "#b02423"), (source, "#247e5b"),
+                        (cursor, CAPTURE_EDGE if capture is not None else "#143f36")):
         if index is None:
             continue
         x, y = pixel(index)
@@ -230,11 +240,13 @@ class Screen:
             last = game.history[-1] if game.history else None
             source = app.lan_source if session else app.source
             flipped = session.color == BLACK if session else app.flipped
+            can_play = not game.ended and (session.can_play if session else not app.computer_turn)
+            cursor_square = square(*cursor) if can_play else None
+            targets = game.destinations(source) if source is not None and can_play else ()
+            capture = cursor_square if cursor_square in targets and game.board[cursor_square] else None
             board(draw, (1, 1, 168, 168), game.board, self.font,
-                  cursor=(square(*cursor) if not game.ended and
-                          (session.can_play if session else not app.computer_turn) else None),
-                  source=source, last=last,
-                  destinations=game.destinations(source) if source is not None and app.settings.show_targets else (),
+                  cursor=cursor_square, source=source, capture=capture, last=last,
+                  destinations=targets if app.settings.show_targets else (),
                   king_in_check=game.board.index(sign(game.turn) * KING) if game.in_check else None,
                   flipped=flipped)
             text(177, 10, tr("menu_title"), 18)
